@@ -1,0 +1,1267 @@
+{
+  "version": "v1",
+  "functions": {
+    "DecodeEvent": "func([].uint8)(Event,interface)",
+    "DefaultHandshakeConfig": "func()(github.com/hashicorp/go-plugin.HandshakeConfig)",
+    "DefaultHealthOptions": "func()(HealthOptions)",
+    "EdgeSubject": "func(.string,.string,.string)(.string)",
+    "EncodeEvent": "func(Event)([].uint8,interface)",
+    "FatalError": "func(interface)(interface)",
+    "FlushHealthReporter": "func(HealthReporter,time.Duration)(interface)",
+    "GetHealthRuntimeStats": "func(HealthReporter)(HealthRuntimeStats)",
+    "GetTraceID": "func(Event)(.string)",
+    "IsBatchNotSupported": "func(interface)(.bool)",
+    "IsFatal": "func(interface)(.bool)",
+    "IsRetryable": "func(interface)(.bool)",
+    "IsSkippable": "func(interface)(.bool)",
+    "NewEngineRPCClient": "func(*net/rpc.Client)(EngineRPC)",
+    "NewEvent": "func(map[.string]interface,map[.string].string)(Event)",
+    "NewFatalError": "func(.string)(interface)",
+    "NewRPCEmitterFromEngine": "func(EngineRPC)(Emitter)",
+    "NewRPCLoggerFromEngine": "func(EngineRPC,.string,.string)(Logger)",
+    "NewRPCMetricsFromEngine": "func(EngineRPC,.string,.string)(Metrics)",
+    "NewRetryableError": "func(.string)(interface)",
+    "NewSkippableError": "func(.string)(interface)",
+    "NewStateManager": "func(.string,.string,StateStore)(StateManager)",
+    "RetryableError": "func(interface)(interface)",
+    "Serve": "func(Plugin,ServeOptions)()",
+    "ServeConnector": "func(ConnectorPlugin)()",
+    "SetTraceID": "func(*Event,.string)()",
+    "SkippableError": "func(interface)(interface)"
+  },
+  "types": {
+    "AckArgs": {
+      "kind": "struct",
+      "fields": [
+        "EventID .string tag=\"\" anonymous=false"
+      ]
+    },
+    "AckMessage": {
+      "kind": "struct",
+      "fields": [
+        "RecordID .string tag=\"json:\\\"record_id\\\"\" anonymous=false",
+        "RuleID .string tag=\"json:\\\"rule_id,omitempty\\\"\" anonymous=false",
+        "BufferNodeID .string tag=\"json:\\\"buffer_node_id,omitempty\\\"\" anonymous=false",
+        "FromNodeID .string tag=\"json:\\\"from_node_id,omitempty\\\"\" anonymous=false",
+        "EventID .string tag=\"json:\\\"event_id,omitempty\\\"\" anonymous=false",
+        "Status .string tag=\"json:\\\"status\\\"\" anonymous=false",
+        "Error .string tag=\"json:\\\"error,omitempty\\\"\" anonymous=false",
+        "AckedAt time.Time tag=\"json:\\\"acked_at\\\"\" anonymous=false"
+      ]
+    },
+    "BasePlugin": {
+      "kind": "struct",
+      "pointer_methods": [
+        "Init func(*BasePlugin,PluginConfig)(interface)",
+        "OnEvent func(*BasePlugin,Event)(interface)",
+        "OnEvents func(*BasePlugin,[]Event)(interface)",
+        "Start func(*BasePlugin,RuntimeContext)(interface)",
+        "Stop func(*BasePlugin)(interface)"
+      ]
+    },
+    "BuiltinRuntimeContext": {
+      "kind": "interface",
+      "methods": [
+        "Connector func()(ConnectorClient)",
+        "Context func()(interface)",
+        "Emitter func()(Emitter)",
+        "Health func()(HealthReporter)",
+        "Logger func()(Logger)",
+        "Metrics func()(Metrics)",
+        "NodeID func()(.string)",
+        "ResourceEvents func()(\u003c-chan chan ResourceStatusEvent)",
+        "RuleID func()(.string)"
+      ]
+    },
+    "ConnectorBindingSpec": {
+      "kind": "struct",
+      "fields": [
+        "Required .bool tag=\"json:\\\"required\\\"\" anonymous=false",
+        "AcceptedFamilies [].string tag=\"json:\\\"accepted_families,omitempty\\\"\" anonymous=false",
+        "RequiredCapabilities [].string tag=\"json:\\\"required_capabilities,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "ConnectorClient": {
+      "kind": "interface",
+      "methods": [
+        "BatchRead func(ConnectorRequest)(ConnectorResponse,interface)",
+        "BatchWrite func(ConnectorRequest)(ConnectorResponse,interface)",
+        "CurrentStatus func(.string)(ResourceStatusEvent,.bool)",
+        "OpenStream func(StreamOpenRequest)(StreamConsumer,interface)",
+        "Read func(ConnectorRequest)(ConnectorResponse,interface)",
+        "Write func(ConnectorRequest)(ConnectorResponse,interface)"
+      ]
+    },
+    "ConnectorDescriptor": {
+      "kind": "struct",
+      "fields": [
+        "Family .string tag=\"json:\\\"family\\\"\" anonymous=false",
+        "Label .string tag=\"json:\\\"label,omitempty\\\"\" anonymous=false",
+        "Capabilities [].string tag=\"json:\\\"capabilities,omitempty\\\"\" anonymous=false",
+        "DisplayFields [].string tag=\"json:\\\"display_fields,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "ConnectorPlugin": {
+      "kind": "interface",
+      "methods": [
+        "AckStream func(.string,StreamAckRequest)(interface)",
+        "CloseStream func(.string,StreamCloseRequest)(interface)",
+        "CreateResource func(ConnectorResource)(.string,interface)",
+        "DestroyResource func(.string)(interface)",
+        "Execute func(.string,ConnectorRequest)(ConnectorResponse,interface)",
+        "GrantCredits func(.string,StreamGrantCreditsRequest)(interface)",
+        "Info func()(PluginInfo)",
+        "NackStream func(.string,StreamNackRequest)(interface)",
+        "OpenStream func(.string,StreamOpenRequest)(StreamOpenResponse,interface)",
+        "Probe func(.string,ConnectorRequest)(ResourceStatusEvent,interface)",
+        "ReceiveStream func(.string,StreamReceiveRequest)(StreamReceiveResponse,interface)",
+        "Stop func()(interface)"
+      ]
+    },
+    "ConnectorRPC": {
+      "kind": "struct",
+      "fields": [
+        "Impl ConnectorPlugin tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "Client func(*ConnectorRPC,*github.com/hashicorp/go-plugin.MuxBroker,*net/rpc.Client)(interface,interface)",
+        "Server func(*ConnectorRPC,*github.com/hashicorp/go-plugin.MuxBroker)(interface,interface)"
+      ]
+    },
+    "ConnectorRPCClient": {
+      "kind": "struct",
+      "fields": [
+        "Client *net/rpc.Client tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "AckStream func(*ConnectorRPCClient,.string,StreamAckRequest)(interface)",
+        "CloseStream func(*ConnectorRPCClient,.string,StreamCloseRequest)(interface)",
+        "CreateResource func(*ConnectorRPCClient,ConnectorResource)(.string,interface)",
+        "DestroyResource func(*ConnectorRPCClient,.string)(interface)",
+        "Execute func(*ConnectorRPCClient,.string,ConnectorRequest)(ConnectorResponse,interface)",
+        "ExecuteWithTimeout func(*ConnectorRPCClient,.string,ConnectorRequest,time.Duration)(ConnectorResponse,interface)",
+        "GrantCredits func(*ConnectorRPCClient,.string,StreamGrantCreditsRequest)(interface)",
+        "Info func(*ConnectorRPCClient)(PluginInfo)",
+        "NackStream func(*ConnectorRPCClient,.string,StreamNackRequest)(interface)",
+        "OpenStream func(*ConnectorRPCClient,.string,StreamOpenRequest)(StreamOpenResponse,interface)",
+        "Probe func(*ConnectorRPCClient,.string,ConnectorRequest)(ResourceStatusEvent,interface)",
+        "ReceiveStream func(*ConnectorRPCClient,.string,StreamReceiveRequest)(StreamReceiveResponse,interface)",
+        "Stop func(*ConnectorRPCClient)(interface)"
+      ]
+    },
+    "ConnectorRPCServer": {
+      "kind": "struct",
+      "fields": [
+        "Impl ConnectorPlugin tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "AckStream func(*ConnectorRPCServer,*wire.ConnectorAckStreamArgs,*wire.ConnectorAckStreamReply)(interface)",
+        "CloseStream func(*ConnectorRPCServer,*wire.ConnectorCloseStreamArgs,*wire.ConnectorCloseStreamReply)(interface)",
+        "CreateResource func(*ConnectorRPCServer,*wire.ConnectorCreateResourceArgs,*wire.ConnectorCreateResourceReply)(interface)",
+        "DestroyResource func(*ConnectorRPCServer,*wire.ConnectorDestroyResourceArgs,*wire.ConnectorDestroyResourceReply)(interface)",
+        "Execute func(*ConnectorRPCServer,*wire.ConnectorExecuteArgs,*wire.ConnectorExecuteReply)(interface)",
+        "GrantCredits func(*ConnectorRPCServer,*wire.ConnectorGrantCreditsArgs,*wire.ConnectorGrantCreditsReply)(interface)",
+        "Info func(*ConnectorRPCServer,struct {},*InfoReply)(interface)",
+        "NackStream func(*ConnectorRPCServer,*wire.ConnectorNackStreamArgs,*wire.ConnectorNackStreamReply)(interface)",
+        "OpenStream func(*ConnectorRPCServer,*wire.ConnectorOpenStreamArgs,*wire.ConnectorOpenStreamReply)(interface)",
+        "Probe func(*ConnectorRPCServer,*wire.ConnectorProbeArgs,*wire.ConnectorProbeReply)(interface)",
+        "ReceiveStream func(*ConnectorRPCServer,*wire.ConnectorReceiveStreamArgs,*wire.ConnectorReceiveStreamReply)(interface)",
+        "Stop func(*ConnectorRPCServer,struct {},*StopReply)(interface)"
+      ]
+    },
+    "ConnectorRequest": {
+      "kind": "struct",
+      "fields": [
+        "ResourceToken .string tag=\"json:\\\"resource_token,omitempty\\\"\" anonymous=false",
+        "Kind ConnectorRequestKind tag=\"json:\\\"kind\\\"\" anonymous=false",
+        "Target .string tag=\"json:\\\"target,omitempty\\\"\" anonymous=false",
+        "Payload [].uint8 tag=\"json:\\\"payload,omitempty\\\"\" anonymous=false",
+        "Priority .string tag=\"json:\\\"priority,omitempty\\\"\" anonymous=false",
+        "UsageWeight .int tag=\"json:\\\"usage_weight,omitempty\\\"\" anonymous=false",
+        "TimeoutMS .int tag=\"json:\\\"timeout_ms,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "ConnectorRequestKind": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.ConnectorRequestKind"
+    },
+    "ConnectorResource": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "Name .string tag=\"json:\\\"name,omitempty\\\"\" anonymous=false",
+        "PluginID .string tag=\"json:\\\"plugin_id\\\"\" anonymous=false",
+        "Connection [].uint8 tag=\"json:\\\"connection,omitempty\\\"\" anonymous=false",
+        "SessionPolicy .string tag=\"json:\\\"session_policy,omitempty\\\"\" anonymous=false",
+        "WarmupPolicy WarmupPolicy tag=\"json:\\\"warmup_policy,omitempty\\\"\" anonymous=false",
+        "HealthPolicy [].uint8 tag=\"json:\\\"health_policy,omitempty\\\"\" anonymous=false",
+        "QuotaPolicy [].uint8 tag=\"json:\\\"quota_policy,omitempty\\\"\" anonymous=false",
+        "ProviderPolicy ProviderPolicy tag=\"json:\\\"provider_policy,omitempty\\\"\" anonymous=false",
+        "Enabled .bool tag=\"json:\\\"enabled\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false"
+      ],
+      "methods": [
+        "GetHealthPolicy func(ConnectorResource)(HealthPolicy,interface)",
+        "GetQuotaPolicy func(ConnectorResource)(QuotaPolicy,interface)"
+      ],
+      "pointer_methods": [
+        "GetHealthPolicy func(*ConnectorResource)(HealthPolicy,interface)",
+        "GetQuotaPolicy func(*ConnectorResource)(QuotaPolicy,interface)",
+        "SetHealthPolicy func(*ConnectorResource,HealthPolicy)(interface)",
+        "SetQuotaPolicy func(*ConnectorResource,QuotaPolicy)(interface)"
+      ]
+    },
+    "ConnectorResponse": {
+      "kind": "struct",
+      "fields": [
+        "Payload [].uint8 tag=\"json:\\\"payload,omitempty\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false",
+        "Congested .bool tag=\"json:\\\"congested,omitempty\\\"\" anonymous=false",
+        "RetryAfterMS .int tag=\"json:\\\"retry_after_ms,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "DefaultLogger": {
+      "kind": "struct",
+      "pointer_methods": [
+        "Debug func(*DefaultLogger,.string,[]Field)() variadic",
+        "Error func(*DefaultLogger,.string,[]Field)() variadic",
+        "Info func(*DefaultLogger,.string,[]Field)() variadic",
+        "LogBatch func(*DefaultLogger,LogLevel,[].string,[]map[.string]interface)()",
+        "Warn func(*DefaultLogger,.string,[]Field)() variadic"
+      ]
+    },
+    "DefaultMetrics": {
+      "kind": "struct",
+      "pointer_methods": [
+        "IncCounter func(*DefaultMetrics,.string,map[.string].string)()",
+        "Observe func(*DefaultMetrics,.string,.float64,map[.string].string)()"
+      ]
+    },
+    "EmitBatchArgs": {
+      "kind": "struct",
+      "fields": [
+        "EventsJSON [][].uint8 tag=\"\" anonymous=false",
+        "ToNodeIDs [].string tag=\"\" anonymous=false"
+      ]
+    },
+    "Emitter": {
+      "kind": "interface",
+      "methods": [
+        "Ack func(.string)(interface)",
+        "EmitBatch func([]Event)(interface)",
+        "EmitTo func(.string,Event)(interface)",
+        "Publish func(Event)(interface)",
+        "PublishAck func(AckMessage)(interface)"
+      ]
+    },
+    "EmitterAdapter": {
+      "kind": "struct",
+      "pointer_methods": [
+        "Ack func(*EmitterAdapter,.string)(interface)",
+        "EmitBatch func(*EmitterAdapter,[]Event)(interface)",
+        "EmitTo func(*EmitterAdapter,.string,Event)(interface)",
+        "Publish func(*EmitterAdapter,Event)(interface)",
+        "PublishAck func(*EmitterAdapter,AckMessage)(interface)"
+      ]
+    },
+    "EngineBridgeRuntimeContext": {
+      "kind": "interface",
+      "methods": [
+        "Connector func()(ConnectorClient)",
+        "Emitter func()(Emitter)",
+        "GetEngineRPCServer func()(interface)",
+        "Health func()(HealthReporter)",
+        "Logger func()(Logger)",
+        "Metrics func()(Metrics)",
+        "NodeID func()(.string)",
+        "ResourceEvents func()(\u003c-chan chan ResourceStatusEvent)",
+        "RuleID func()(.string)",
+        "SavePluginRPCClient func(*PluginRPCClient)()"
+      ]
+    },
+    "EngineRPC": {
+      "kind": "interface",
+      "methods": [
+        "Ack func(.string)(interface)",
+        "AckConnectorStream func(StreamAckRequest)(interface)",
+        "CloseConnectorStream func(StreamCloseRequest)(interface)",
+        "CurrentResourceStatus func(.string)(ResourceStatusEvent,.bool)",
+        "DeleteState func(.string)(interface)",
+        "Emit func(Event)(interface)",
+        "EmitBatch func([]Event)(interface)",
+        "EmitWithTargets func(Event,[].string)(interface)",
+        "ExecuteConnector func(ConnectorRequest)(ConnectorResponse,interface)",
+        "GetState func(.string)([].uint8,interface)",
+        "GrantConnectorStream func(StreamGrantCreditsRequest)(interface)",
+        "IncCounter func(.string,map[.string].string)()",
+        "Log func(LogLevel,.string,map[.string]interface)()",
+        "LogBatch func(LogLevel,[].string,[]map[.string]interface)()",
+        "NackConnectorStream func(StreamNackRequest)(interface)",
+        "NextResourceEvent func(time.Duration)(ResourceStatusEvent,.bool,interface)",
+        "Observe func(.string,.float64,map[.string].string)()",
+        "OpenConnectorStream func(StreamOpenRequest)(StreamOpenResponse,interface)",
+        "PublishAck func(AckMessage)(interface)",
+        "ReceiveConnectorStream func(StreamReceiveRequest)(StreamReceiveResponse,interface)",
+        "ReportHealth func(ReportHealthArgs)(interface)",
+        "SetState func(.string,[].uint8)(interface)",
+        "SetStateWithTTL func(.string,[].uint8,time.Duration)(interface)"
+      ]
+    },
+    "EngineRPCClient": {
+      "kind": "struct",
+      "pointer_methods": [
+        "Ack func(*EngineRPCClient,.string)(interface)",
+        "AckConnectorStream func(*EngineRPCClient,StreamAckRequest)(interface)",
+        "CloseConnectorStream func(*EngineRPCClient,StreamCloseRequest)(interface)",
+        "CurrentResourceStatus func(*EngineRPCClient,.string)(ResourceStatusEvent,.bool)",
+        "DeleteState func(*EngineRPCClient,.string)(interface)",
+        "Emit func(*EngineRPCClient,Event)(interface)",
+        "EmitBatch func(*EngineRPCClient,[]Event)(interface)",
+        "EmitWithTargets func(*EngineRPCClient,Event,[].string)(interface)",
+        "ExecuteConnector func(*EngineRPCClient,ConnectorRequest)(ConnectorResponse,interface)",
+        "GetState func(*EngineRPCClient,.string)([].uint8,interface)",
+        "GrantConnectorStream func(*EngineRPCClient,StreamGrantCreditsRequest)(interface)",
+        "IncCounter func(*EngineRPCClient,.string,map[.string].string)()",
+        "Log func(*EngineRPCClient,LogLevel,.string,map[.string]interface)()",
+        "LogBatch func(*EngineRPCClient,LogLevel,[].string,[]map[.string]interface)()",
+        "NackConnectorStream func(*EngineRPCClient,StreamNackRequest)(interface)",
+        "NextResourceEvent func(*EngineRPCClient,time.Duration)(ResourceStatusEvent,.bool,interface)",
+        "Observe func(*EngineRPCClient,.string,.float64,map[.string].string)()",
+        "OpenConnectorStream func(*EngineRPCClient,StreamOpenRequest)(StreamOpenResponse,interface)",
+        "PublishAck func(*EngineRPCClient,AckMessage)(interface)",
+        "ReceiveConnectorStream func(*EngineRPCClient,StreamReceiveRequest)(StreamReceiveResponse,interface)",
+        "ReportHealth func(*EngineRPCClient,ReportHealthArgs)(interface)",
+        "SetState func(*EngineRPCClient,.string,[].uint8)(interface)",
+        "SetStateWithTTL func(*EngineRPCClient,.string,[].uint8,time.Duration)(interface)"
+      ]
+    },
+    "ErrorKind": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.ErrorKind"
+    },
+    "Event": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "Timestamp time.Time tag=\"json:\\\"timestamp\\\"\" anonymous=false",
+        "Payload map[.string]interface tag=\"json:\\\"payload\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata\\\"\" anonymous=false",
+        "RuleID .string tag=\"json:\\\"-\\\"\" anonymous=false",
+        "Source .string tag=\"json:\\\"-\\\"\" anonymous=false"
+      ],
+      "methods": [
+        "Clone func(Event)(Event)"
+      ],
+      "pointer_methods": [
+        "Clone func(*Event)(Event)"
+      ]
+    },
+    "Field": {
+      "kind": "struct",
+      "fields": [
+        "Key .string tag=\"\" anonymous=false",
+        "Value interface tag=\"\" anonymous=false"
+      ]
+    },
+    "HealthHeartbeat": {
+      "kind": "struct",
+      "fields": [
+        "Message .string tag=\"json:\\\"message,omitempty\\\"\" anonymous=false",
+        "Details map[.string].string tag=\"json:\\\"details,omitempty\\\"\" anonymous=false",
+        "ObservedAt time.Time tag=\"json:\\\"observed_at,omitempty\\\"\" anonymous=false",
+        "Sequence .uint64 tag=\"json:\\\"sequence,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "HealthKind": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/healthruntime.Kind"
+    },
+    "HealthOptions": {
+      "kind": "struct",
+      "fields": [
+        "HeartbeatInterval time.Duration tag=\"json:\\\"heartbeat_interval,omitempty\\\"\" anonymous=false",
+        "MaxSilencePeriod time.Duration tag=\"json:\\\"max_silence_period,omitempty\\\"\" anonymous=false",
+        "QueueCapacity .int tag=\"json:\\\"queue_capacity,omitempty\\\"\" anonymous=false"
+      ],
+      "methods": [
+        "Normalize func(HealthOptions)(HealthOptions)"
+      ],
+      "pointer_methods": [
+        "Normalize func(*HealthOptions)(HealthOptions)"
+      ]
+    },
+    "HealthPolicy": {
+      "kind": "struct",
+      "fields": [
+        "Enabled .bool tag=\"json:\\\"enabled,omitempty\\\"\" anonymous=false",
+        "IntervalMS .int tag=\"json:\\\"interval_ms,omitempty\\\"\" anonymous=false",
+        "TimeoutMS .int tag=\"json:\\\"timeout_ms,omitempty\\\"\" anonymous=false",
+        "Target .string tag=\"json:\\\"target,omitempty\\\"\" anonymous=false",
+        "Priority .string tag=\"json:\\\"priority,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "HealthReport": {
+      "kind": "struct",
+      "fields": [
+        "Status HealthStatus tag=\"json:\\\"status\\\"\" anonymous=false",
+        "Code .string tag=\"json:\\\"code,omitempty\\\"\" anonymous=false",
+        "Message .string tag=\"json:\\\"message,omitempty\\\"\" anonymous=false",
+        "Details map[.string].string tag=\"json:\\\"details,omitempty\\\"\" anonymous=false",
+        "ObservedAt time.Time tag=\"json:\\\"observed_at,omitempty\\\"\" anonymous=false",
+        "Sequence .uint64 tag=\"json:\\\"sequence,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "HealthReporter": {
+      "kind": "interface",
+      "methods": [
+        "Degraded func(.string,.string,map[.string].string)(interface)",
+        "Healthy func(.string,map[.string].string)(interface)",
+        "Heartbeat func(.string,map[.string].string)(interface)",
+        "Recovering func(.string,.string,map[.string].string)(interface)",
+        "Report func(HealthReport)(interface)",
+        "Unhealthy func(.string,.string,map[.string].string)(interface)"
+      ]
+    },
+    "HealthRuntimeStats": {
+      "kind": "struct",
+      "fields": [
+        "CoalescedStates .uint64 tag=\"json:\\\"coalesced_states\\\"\" anonymous=false",
+        "CoalescedHeartbeats .uint64 tag=\"json:\\\"coalesced_heartbeats\\\"\" anonymous=false",
+        "SenderErrors .uint64 tag=\"json:\\\"sender_errors\\\"\" anonymous=false"
+      ]
+    },
+    "HealthStatus": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/healthruntime.Status"
+    },
+    "InfoReply": {
+      "kind": "struct",
+      "fields": [
+        "Info PluginInfo tag=\"\" anonymous=false"
+      ]
+    },
+    "InitArgs": {
+      "kind": "struct",
+      "fields": [
+        "Config PluginConfig tag=\"\" anonymous=false"
+      ]
+    },
+    "InitReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "LogBatchArgs": {
+      "kind": "struct",
+      "fields": [
+        "Level LogLevel tag=\"\" anonymous=false",
+        "Messages [].string tag=\"\" anonymous=false",
+        "Fields []map[.string]interface tag=\"\" anonymous=false"
+      ]
+    },
+    "LogLevel": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.LogLevel"
+    },
+    "Logger": {
+      "kind": "interface",
+      "methods": [
+        "Debug func(.string,[]Field)() variadic",
+        "Error func(.string,[]Field)() variadic",
+        "Info func(.string,[]Field)() variadic",
+        "LogBatch func(LogLevel,[].string,[]map[.string]interface)()",
+        "Warn func(.string,[]Field)() variadic"
+      ]
+    },
+    "MetricArgs": {
+      "kind": "struct",
+      "fields": [
+        "Name .string tag=\"\" anonymous=false",
+        "Value .float64 tag=\"\" anonymous=false",
+        "Labels map[.string].string tag=\"\" anonymous=false"
+      ]
+    },
+    "Metrics": {
+      "kind": "interface",
+      "methods": [
+        "IncCounter func(.string,map[.string].string)()",
+        "Observe func(.string,.float64,map[.string].string)()"
+      ]
+    },
+    "Plugin": {
+      "kind": "interface",
+      "methods": [
+        "Info func()(PluginInfo)",
+        "Init func(PluginConfig)(interface)",
+        "OnEvent func(Event)(interface)",
+        "OnEvents func([]Event)(interface)",
+        "Start func(RuntimeContext)(interface)",
+        "Stop func()(interface)"
+      ]
+    },
+    "PluginCapabilities": {
+      "kind": "struct",
+      "fields": [
+        "InputPorts .int tag=\"json:\\\"input_ports\\\"\" anonymous=false",
+        "OutputPorts .int tag=\"json:\\\"output_ports\\\"\" anonymous=false",
+        "SupportBatch .bool tag=\"json:\\\"support_batch\\\"\" anonymous=false",
+        "SupportAck .bool tag=\"json:\\\"support_ack\\\"\" anonymous=false",
+        "ConfigSchema .string tag=\"json:\\\"config_schema\\\"\" anonymous=false",
+        "Stateful .bool tag=\"json:\\\"stateful\\\"\" anonymous=false",
+        "ConnectorDescriptor *ConnectorDescriptor tag=\"json:\\\"connector_descriptor,omitempty\\\"\" anonymous=false",
+        "ConnectorBinding *ConnectorBindingSpec tag=\"json:\\\"connector_binding,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "PluginConfig": {
+      "kind": "struct",
+      "fields": [
+        "Raw [].uint8 tag=\"json:\\\"raw\\\"\" anonymous=false",
+        "RuleID .string tag=\"json:\\\"rule_id,omitempty\\\"\" anonymous=false",
+        "NodeID .string tag=\"json:\\\"node_id,omitempty\\\"\" anonymous=false",
+        "Health HealthOptions tag=\"json:\\\"health,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "PluginError": {
+      "kind": "struct",
+      "fields": [
+        "Kind ErrorKind tag=\"json:\\\"kind\\\"\" anonymous=false",
+        "Message .string tag=\"json:\\\"message\\\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "Error func(*PluginError)(.string)",
+        "Is func(*PluginError,interface)(.bool)",
+        "Unwrap func(*PluginError)(interface)"
+      ]
+    },
+    "PluginInfo": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "Name .string tag=\"json:\\\"name\\\"\" anonymous=false",
+        "Version .string tag=\"json:\\\"version\\\"\" anonymous=false",
+        "Type PluginType tag=\"json:\\\"type\\\"\" anonymous=false",
+        "Description .string tag=\"json:\\\"description\\\"\" anonymous=false",
+        "Author .string tag=\"json:\\\"author\\\"\" anonymous=false",
+        "Category .string tag=\"json:\\\"category\\\"\" anonymous=false",
+        "Capabilities PluginCapabilities tag=\"json:\\\"capabilities\\\"\" anonymous=false"
+      ]
+    },
+    "PluginRPC": {
+      "kind": "struct",
+      "fields": [
+        "Impl Plugin tag=\"\" anonymous=false",
+        "Factory func()(Plugin) tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "Client func(*PluginRPC,*github.com/hashicorp/go-plugin.MuxBroker,*net/rpc.Client)(interface,interface)",
+        "Server func(*PluginRPC,*github.com/hashicorp/go-plugin.MuxBroker)(interface,interface)"
+      ]
+    },
+    "PluginRPCClient": {
+      "kind": "struct",
+      "fields": [
+        "Client *net/rpc.Client tag=\"\" anonymous=false",
+        "Broker *github.com/hashicorp/go-plugin.MuxBroker tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "Info func(*PluginRPCClient)(PluginInfo)",
+        "Init func(*PluginRPCClient,PluginConfig)(interface)",
+        "InitWithTimeout func(*PluginRPCClient,PluginConfig,time.Duration)(interface)",
+        "ReceiveEvent func(*PluginRPCClient,Event)(interface)",
+        "ReceiveEventWithTimeout func(*PluginRPCClient,Event,time.Duration)(interface)",
+        "ReceiveEvents func(*PluginRPCClient,[]Event)(interface)",
+        "ReceiveEventsWithTimeout func(*PluginRPCClient,[]Event,time.Duration)(interface)",
+        "Start func(*PluginRPCClient,*StartArgs)(interface)",
+        "Stop func(*PluginRPCClient)(interface)",
+        "StopWithTimeout func(*PluginRPCClient,time.Duration)(interface)"
+      ]
+    },
+    "PluginRPCServer": {
+      "kind": "struct",
+      "fields": [
+        "Impl Plugin tag=\"\" anonymous=false"
+      ],
+      "pointer_methods": [
+        "Info func(*PluginRPCServer,struct {},*InfoReply)(interface)",
+        "Init func(*PluginRPCServer,*InitArgs,*InitReply)(interface)",
+        "ReceiveEvent func(*PluginRPCServer,*ReceiveEventArgs,*ReceiveEventReply)(interface)",
+        "ReceiveEvents func(*PluginRPCServer,*ReceiveEventsArgs,*ReceiveEventsReply)(interface)",
+        "Start func(*PluginRPCServer,*StartArgs,*StartReply)(interface)",
+        "Stop func(*PluginRPCServer,struct {},*StopReply)(interface)"
+      ]
+    },
+    "PluginType": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.PluginType"
+    },
+    "ProviderPolicy": {
+      "kind": "struct",
+      "fields": [
+        "MaxResourcesPerProvider .int tag=\"json:\\\"max_resources_per_provider,omitempty\\\"\" anonymous=false",
+        "MaxInflightPerProvider .int tag=\"json:\\\"max_inflight_per_provider,omitempty\\\"\" anonymous=false",
+        "PreferredProviderCount .int tag=\"json:\\\"preferred_provider_count,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "PublishAckArgs": {
+      "kind": "struct",
+      "fields": [
+        "Ack AckMessage tag=\"\" anonymous=false"
+      ]
+    },
+    "QuotaPolicy": {
+      "kind": "struct",
+      "fields": [
+        "MaxInflightRequests .int tag=\"json:\\\"max_inflight_requests,omitempty\\\"\" anonymous=false",
+        "MaxInflightWeight .int tag=\"json:\\\"max_inflight_weight,omitempty\\\"\" anonymous=false",
+        "DefaultUsageWeight .int tag=\"json:\\\"default_usage_weight,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "ReceiveEventArgs": {
+      "kind": "struct",
+      "fields": [
+        "EventJSON [].uint8 tag=\"\" anonymous=false"
+      ]
+    },
+    "ReceiveEventReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "ReceiveEventsArgs": {
+      "kind": "struct",
+      "fields": [
+        "EventsJSON [].uint8 tag=\"\" anonymous=false"
+      ]
+    },
+    "ReceiveEventsReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "ReportHealthArgs": {
+      "kind": "struct",
+      "fields": [
+        "Kind HealthKind tag=\"json:\\\"kind\\\"\" anonymous=false",
+        "Status HealthStatus tag=\"json:\\\"status,omitempty\\\"\" anonymous=false",
+        "Code .string tag=\"json:\\\"code,omitempty\\\"\" anonymous=false",
+        "Message .string tag=\"json:\\\"message,omitempty\\\"\" anonymous=false",
+        "Details map[.string].string tag=\"json:\\\"details,omitempty\\\"\" anonymous=false",
+        "ObservedAtUnixNano .int64 tag=\"json:\\\"observed_at_unix_nano,omitempty\\\"\" anonymous=false",
+        "Sequence .uint64 tag=\"json:\\\"sequence,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "ResourceStatus": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.ResourceStatus"
+    },
+    "ResourceStatusEvent": {
+      "kind": "struct",
+      "fields": [
+        "ResourceID .string tag=\"json:\\\"resource_id,omitempty\\\"\" anonymous=false",
+        "ProviderPluginID .string tag=\"json:\\\"provider_plugin_id,omitempty\\\"\" anonymous=false",
+        "ProviderInstanceID .string tag=\"json:\\\"provider_instance_id,omitempty\\\"\" anonymous=false",
+        "Status ResourceStatus tag=\"json:\\\"status\\\"\" anonymous=false",
+        "ReasonCode .string tag=\"json:\\\"reason_code,omitempty\\\"\" anonymous=false",
+        "Message .string tag=\"json:\\\"message,omitempty\\\"\" anonymous=false",
+        "Details map[.string].string tag=\"json:\\\"details,omitempty\\\"\" anonymous=false",
+        "ObservedAtUnixNano .int64 tag=\"json:\\\"observed_at_unix_nano,omitempty\\\"\" anonymous=false",
+        "Sequence .uint64 tag=\"json:\\\"sequence,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "RuntimeContext": {
+      "kind": "interface",
+      "methods": [
+        "Connector func()(ConnectorClient)",
+        "Emitter func()(Emitter)",
+        "Health func()(HealthReporter)",
+        "Logger func()(Logger)",
+        "Metrics func()(Metrics)",
+        "NodeID func()(.string)",
+        "ResourceEvents func()(\u003c-chan chan ResourceStatusEvent)",
+        "RuleID func()(.string)"
+      ]
+    },
+    "RuntimeContextImpl": {
+      "kind": "struct",
+      "pointer_methods": [
+        "Connector func(*RuntimeContextImpl)(ConnectorClient)",
+        "Context func(*RuntimeContextImpl)(interface)",
+        "Emitter func(*RuntimeContextImpl)(Emitter)",
+        "Health func(*RuntimeContextImpl)(HealthReporter)",
+        "Logger func(*RuntimeContextImpl)(Logger)",
+        "Metrics func(*RuntimeContextImpl)(Metrics)",
+        "NodeID func(*RuntimeContextImpl)(.string)",
+        "ResourceEvents func(*RuntimeContextImpl)(\u003c-chan chan ResourceStatusEvent)",
+        "RuleID func(*RuntimeContextImpl)(.string)",
+        "SavePluginRPCClient func(*RuntimeContextImpl,*PluginRPCClient)()",
+        "State func(*RuntimeContextImpl)(StateManager)"
+      ]
+    },
+    "ServeOptions": {
+      "kind": "struct",
+      "fields": [
+        "Health HealthOptions tag=\"\" anonymous=false"
+      ]
+    },
+    "StartArgs": {
+      "kind": "struct",
+      "fields": [
+        "RuleID .string tag=\"\" anonymous=false",
+        "NodeID .string tag=\"\" anonymous=false",
+        "Health HealthOptions tag=\"\" anonymous=false",
+        "ResourceEventsEnabled .bool tag=\"\" anonymous=false",
+        "BrokerID .uint32 tag=\"\" anonymous=false"
+      ]
+    },
+    "StartReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "StateGetReply": {
+      "kind": "struct",
+      "fields": [
+        "Value [].uint8 tag=\"\" anonymous=false",
+        "Found .bool tag=\"\" anonymous=false"
+      ]
+    },
+    "StateKeyArgs": {
+      "kind": "struct",
+      "fields": [
+        "Key .string tag=\"\" anonymous=false"
+      ]
+    },
+    "StateManager": {
+      "kind": "interface",
+      "methods": [
+        "DeleteState func(.string)(interface)",
+        "GenerateKey func([].string)(.string)",
+        "GetState func(.string,interface)(interface)",
+        "SetState func(.string,interface)(interface)",
+        "SetStateWithTTL func(.string,interface,time.Duration)(interface)"
+      ]
+    },
+    "StateSetArgs": {
+      "kind": "struct",
+      "fields": [
+        "Key .string tag=\"\" anonymous=false",
+        "Value [].uint8 tag=\"\" anonymous=false"
+      ]
+    },
+    "StateSetWithTTLArgs": {
+      "kind": "struct",
+      "fields": [
+        "Key .string tag=\"\" anonymous=false",
+        "Value [].uint8 tag=\"\" anonymous=false",
+        "TTLNanos .int64 tag=\"\" anonymous=false"
+      ]
+    },
+    "StateStore": {
+      "kind": "interface",
+      "methods": [
+        "DeleteState func(interface,.string)(interface)",
+        "GetState func(interface,.string,interface)(interface)",
+        "SetState func(interface,.string,interface)(interface)",
+        "SetStateWithTTL func(interface,.string,interface,time.Duration)(interface)"
+      ]
+    },
+    "StatefulRuntimeContext": {
+      "kind": "interface",
+      "methods": [
+        "Connector func()(ConnectorClient)",
+        "Emitter func()(Emitter)",
+        "Health func()(HealthReporter)",
+        "Logger func()(Logger)",
+        "Metrics func()(Metrics)",
+        "NodeID func()(.string)",
+        "ResourceEvents func()(\u003c-chan chan ResourceStatusEvent)",
+        "RuleID func()(.string)",
+        "State func()(StateManager)"
+      ]
+    },
+    "StopReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "StreamAckRequest": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "DeliveryID .string tag=\"json:\\\"delivery_id\\\"\" anonymous=false",
+        "Credits .int tag=\"json:\\\"credits,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamCloseRequest": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "Reason .string tag=\"json:\\\"reason,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamConsumer": {
+      "kind": "interface",
+      "methods": [
+        "Ack func(.string,.int)(interface)",
+        "Close func()(interface)",
+        "GrantCredits func(.int)(interface)",
+        "ID func()(.string)",
+        "Nack func(.string,.bool,.string,.int)(interface)",
+        "Recv func(time.Duration)(StreamMessage,.bool,interface)"
+      ]
+    },
+    "StreamDeliverySemantics": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.StreamDeliverySemantics"
+    },
+    "StreamGrantCreditsRequest": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "Credits .int tag=\"json:\\\"credits\\\"\" anonymous=false"
+      ]
+    },
+    "StreamMessage": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id,omitempty\\\"\" anonymous=false",
+        "DeliveryID .string tag=\"json:\\\"delivery_id,omitempty\\\"\" anonymous=false",
+        "Sequence .uint64 tag=\"json:\\\"sequence,omitempty\\\"\" anonymous=false",
+        "Topic .string tag=\"json:\\\"topic,omitempty\\\"\" anonymous=false",
+        "Key .string tag=\"json:\\\"key,omitempty\\\"\" anonymous=false",
+        "RawPayload [].uint8 tag=\"json:\\\"raw_payload,omitempty\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false",
+        "PublishedAtUnixNano .int64 tag=\"json:\\\"published_at_unix_nano,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamNackRequest": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "DeliveryID .string tag=\"json:\\\"delivery_id\\\"\" anonymous=false",
+        "Reason .string tag=\"json:\\\"reason,omitempty\\\"\" anonymous=false",
+        "Requeue .bool tag=\"json:\\\"requeue,omitempty\\\"\" anonymous=false",
+        "Credits .int tag=\"json:\\\"credits,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamOpenRequest": {
+      "kind": "struct",
+      "fields": [
+        "ResourceRef .string tag=\"json:\\\"resource_ref,omitempty\\\"\" anonymous=false",
+        "SessionKey .string tag=\"json:\\\"session_key,omitempty\\\"\" anonymous=false",
+        "Target .string tag=\"json:\\\"target,omitempty\\\"\" anonymous=false",
+        "Payload [].uint8 tag=\"json:\\\"payload,omitempty\\\"\" anonymous=false",
+        "Priority .string tag=\"json:\\\"priority,omitempty\\\"\" anonymous=false",
+        "UsageWeight .int tag=\"json:\\\"usage_weight,omitempty\\\"\" anonymous=false",
+        "InitialCredits .int tag=\"json:\\\"initial_credits,omitempty\\\"\" anonymous=false",
+        "MaxBufferedMessages .int tag=\"json:\\\"max_buffered_messages,omitempty\\\"\" anonymous=false",
+        "OverflowPolicy .string tag=\"json:\\\"overflow_policy,omitempty\\\"\" anonymous=false",
+        "AckTimeoutMS .int tag=\"json:\\\"ack_timeout_ms,omitempty\\\"\" anonymous=false",
+        "MaxDeliverBatch .int tag=\"json:\\\"max_deliver_batch,omitempty\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamOpenResponse": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "DeliverySemantics StreamDeliverySemantics tag=\"json:\\\"delivery_semantics,omitempty\\\"\" anonymous=false",
+        "InitialCredits .int tag=\"json:\\\"initial_credits,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamReceiveRequest": {
+      "kind": "struct",
+      "fields": [
+        "StreamID .string tag=\"json:\\\"stream_id\\\"\" anonymous=false",
+        "MaxMessages .int tag=\"json:\\\"max_messages,omitempty\\\"\" anonymous=false",
+        "WaitTimeoutMS .int tag=\"json:\\\"wait_timeout_ms,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "StreamReceiveResponse": {
+      "kind": "struct",
+      "fields": [
+        "Messages []StreamMessage tag=\"json:\\\"messages,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "WarmupPolicy": {
+      "kind": "string",
+      "underlying": "github.com/punk-one/iot-rule-plugin-sdk/internal/core.WarmupPolicy"
+    },
+    "schema.FlowMetadata": {
+      "kind": "map",
+      "underlying": "map[.string]interface"
+    },
+    "schema.GrayReleaseConfig": {
+      "kind": "struct",
+      "fields": [
+        "RuleID .string tag=\"json:\\\"rule_id\\\"\" anonymous=false",
+        "Version .int tag=\"json:\\\"version\\\"\" anonymous=false",
+        "Enabled .bool tag=\"json:\\\"enabled\\\"\" anonymous=false",
+        "Strategy .string tag=\"json:\\\"strategy\\\"\" anonymous=false",
+        "Percentage .int tag=\"json:\\\"percentage\\\"\" anonymous=false",
+        "Condition map[.string].string tag=\"json:\\\"condition\\\"\" anonymous=false",
+        "TargetNodes [].string tag=\"json:\\\"target_nodes\\\"\" anonymous=false",
+        "CreatedAt time.Time tag=\"json:\\\"created_at\\\"\" anonymous=false",
+        "UpdatedAt time.Time tag=\"json:\\\"updated_at\\\"\" anonymous=false"
+      ]
+    },
+    "schema.NodeConfig": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "Type .string tag=\"json:\\\"type\\\"\" anonymous=false",
+        "Name .string tag=\"json:\\\"name\\\"\" anonymous=false",
+        "Plugin .string tag=\"json:\\\"plugin,omitempty\\\"\" anonymous=false",
+        "Config map[.string]interface tag=\"json:\\\"config\\\"\" anonymous=false",
+        "Metadata *schema.NodeMetadata tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false",
+        "Wires [].string tag=\"json:\\\"wires\\\"\" anonymous=false",
+        "Routes []schema.RouteConfig tag=\"json:\\\"routes,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "schema.NodeMetadata": {
+      "kind": "struct",
+      "fields": [
+        "Position *schema.Position tag=\"json:\\\"position,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "schema.Position": {
+      "kind": "struct",
+      "fields": [
+        "X .float64 tag=\"json:\\\"x\\\"\" anonymous=false",
+        "Y .float64 tag=\"json:\\\"y\\\"\" anonymous=false"
+      ]
+    },
+    "schema.RouteConfig": {
+      "kind": "struct",
+      "fields": [
+        "Label .string tag=\"json:\\\"label\\\"\" anonymous=false",
+        "To .string tag=\"json:\\\"to\\\"\" anonymous=false"
+      ]
+    },
+    "schema.RuleFlow": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "Name .string tag=\"json:\\\"name\\\"\" anonymous=false",
+        "Version .int tag=\"json:\\\"version\\\"\" anonymous=false",
+        "Enabled .bool tag=\"json:\\\"enabled\\\"\" anonymous=false",
+        "DebugMode .bool tag=\"json:\\\"debug_mode\\\"\" anonymous=false",
+        "Description .string tag=\"json:\\\"description\\\"\" anonymous=false",
+        "LifecycleStatus .string tag=\"json:\\\"lifecycle_status,omitempty\\\"\" anonymous=false",
+        "CreatedAt time.Time tag=\"json:\\\"created_at,omitempty\\\"\" anonymous=false",
+        "UpdatedAt time.Time tag=\"json:\\\"updated_at,omitempty\\\"\" anonymous=false",
+        "Metadata *schema.FlowMetadata tag=\"json:\\\"metadata,omitempty\\\"\" anonymous=false",
+        "Source *schema.SourceConfig tag=\"json:\\\"source\\\"\" anonymous=false",
+        "Nodes []*schema.NodeConfig tag=\"json:\\\"nodes\\\"\" anonymous=false"
+      ]
+    },
+    "schema.RuleMessage": {
+      "kind": "struct",
+      "fields": [
+        "Payload []map[.string]interface tag=\"json:\\\"payload\\\"\" anonymous=false",
+        "BatchSize .int tag=\"json:\\\"batch_size\\\"\" anonymous=false",
+        "Metadata map[.string].string tag=\"json:\\\"metadata\\\"\" anonymous=false",
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "SourceID .string tag=\"json:\\\"source_id\\\"\" anonymous=false",
+        "Timestamp .int64 tag=\"json:\\\"timestamp\\\"\" anonymous=false",
+        "TraceID .string tag=\"json:\\\"trace_id\\\"\" anonymous=false",
+        "RuleID .string tag=\"json:\\\"rule_id\\\"\" anonymous=false",
+        "FromNodeID .string tag=\"json:\\\"from_node_id\\\"\" anonymous=false",
+        "IsDryRun .bool tag=\"json:\\\"is_dry_run\\\"\" anonymous=false",
+        "IsDebug .bool tag=\"json:\\\"is_debug\\\"\" anonymous=false",
+        "Error .string tag=\"json:\\\"error,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "schema.RuleSnapshot": {
+      "kind": "struct",
+      "fields": [
+        "ID .string tag=\"json:\\\"id\\\"\" anonymous=false",
+        "RuleID .string tag=\"json:\\\"rule_id\\\"\" anonymous=false",
+        "Version .int tag=\"json:\\\"version\\\"\" anonymous=false",
+        "RuleFlow schema.RuleFlow tag=\"json:\\\"rule_flow\\\"\" anonymous=false",
+        "CreatedAt time.Time tag=\"json:\\\"created_at\\\"\" anonymous=false",
+        "CreatedBy .string tag=\"json:\\\"created_by\\\"\" anonymous=false",
+        "Description .string tag=\"json:\\\"description\\\"\" anonymous=false"
+      ]
+    },
+    "schema.SourceConfig": {
+      "kind": "struct",
+      "fields": [
+        "Type .string tag=\"json:\\\"type\\\"\" anonymous=false",
+        "Topic .string tag=\"json:\\\"topic\\\"\" anonymous=false",
+        "DataFormat .string tag=\"json:\\\"data_format\\\"\" anonymous=false",
+        "Config map[.string]interface tag=\"json:\\\"config,omitempty\\\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorAckStreamArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamAckRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorAckStreamReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorCloseStreamArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamCloseRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorCloseStreamReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorCreateResourceArgs": {
+      "kind": "struct",
+      "fields": [
+        "Resource ConnectorResource tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorCreateResourceReply": {
+      "kind": "struct",
+      "fields": [
+        "Handle .string tag=\"\" anonymous=false",
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorDestroyResourceArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorDestroyResourceReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorExecuteArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request ConnectorRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorExecuteReply": {
+      "kind": "struct",
+      "fields": [
+        "Response ConnectorResponse tag=\"\" anonymous=false",
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorGrantCreditsArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamGrantCreditsRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorGrantCreditsReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorNackStreamArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamNackRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorNackStreamReply": {
+      "kind": "struct",
+      "fields": [
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorOpenStreamArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamOpenRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorOpenStreamReply": {
+      "kind": "struct",
+      "fields": [
+        "Response StreamOpenResponse tag=\"\" anonymous=false",
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorProbeArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request ConnectorRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorProbeReply": {
+      "kind": "struct",
+      "fields": [
+        "Event ResourceStatusEvent tag=\"\" anonymous=false",
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorReceiveStreamArgs": {
+      "kind": "struct",
+      "fields": [
+        "ProviderHandle .string tag=\"\" anonymous=false",
+        "Request StreamReceiveRequest tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.ConnectorReceiveStreamReply": {
+      "kind": "struct",
+      "fields": [
+        "Response StreamReceiveResponse tag=\"\" anonymous=false",
+        "Error .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.CurrentResourceStatusArgs": {
+      "kind": "struct",
+      "fields": [
+        "ResourceRef .string tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.CurrentResourceStatusReply": {
+      "kind": "struct",
+      "fields": [
+        "Event ResourceStatusEvent tag=\"\" anonymous=false",
+        "Found .bool tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.NextResourceEventArgs": {
+      "kind": "struct",
+      "fields": [
+        "TimeoutMS .int tag=\"\" anonymous=false"
+      ]
+    },
+    "wire.NextResourceEventReply": {
+      "kind": "struct",
+      "fields": [
+        "Event ResourceStatusEvent tag=\"\" anonymous=false",
+        "OK .bool tag=\"\" anonymous=false"
+      ]
+    }
+  },
+  "constants": {
+    "AckStatusFailed": "string:failed",
+    "AckStatusSuccess": "string:success",
+    "ConnectorRequestBatchRead": "core.ConnectorRequestKind:batch_read",
+    "ConnectorRequestBatchWrite": "core.ConnectorRequestKind:batch_write",
+    "ConnectorRequestMetadata": "core.ConnectorRequestKind:metadata",
+    "ConnectorRequestRead": "core.ConnectorRequestKind:read",
+    "ConnectorRequestWrite": "core.ConnectorRequestKind:write",
+    "ConnectorSessionPolicyIdleTimeout": "string:idle_timeout",
+    "ConnectorSessionPolicyPerOperation": "string:per_operation",
+    "ConnectorSessionPolicyPersistent": "string:persistent",
+    "ConnectorSessionPolicyPooled": "string:pooled",
+    "ConnectorSessionPolicyScheduledReuse": "string:scheduled_reuse",
+    "ConnectorSessionPolicyStateless": "string:stateless",
+    "ErrorKindBatchUnsupported": "core.ErrorKind:batch_unsupported",
+    "ErrorKindFatal": "core.ErrorKind:fatal",
+    "ErrorKindNotImplemented": "core.ErrorKind:not_implemented",
+    "ErrorKindRetryable": "core.ErrorKind:retryable",
+    "ErrorKindSkippable": "core.ErrorKind:skippable",
+    "EventMetadataTraceIDKey": "string:trace_id",
+    "HealthDegraded": "healthruntime.Status:degraded",
+    "HealthHealthy": "healthruntime.Status:healthy",
+    "HealthInitializing": "healthruntime.Status:initializing",
+    "HealthKindHeartbeat": "healthruntime.Kind:heartbeat",
+    "HealthKindState": "healthruntime.Kind:state",
+    "HealthRecovering": "healthruntime.Status:recovering",
+    "HealthStopped": "healthruntime.Status:stopped",
+    "HealthUnhealthy": "healthruntime.Status:unhealthy",
+    "HealthUnknown": "healthruntime.Status:unknown",
+    "LogLevelDebug": "core.LogLevel:DEBUG",
+    "LogLevelError": "core.LogLevel:ERROR",
+    "LogLevelInfo": "core.LogLevel:INFO",
+    "LogLevelWarn": "core.LogLevel:WARN",
+    "PluginTypeConnector": "core.PluginType:connector",
+    "PluginTypeProcessor": "core.PluginType:processor",
+    "PluginTypeSink": "core.PluginType:sink",
+    "PluginTypeSource": "core.PluginType:source",
+    "PluginTypeUtility": "core.PluginType:utility",
+    "ResourceStatusBlocked": "core.ResourceStatus:blocked",
+    "ResourceStatusCongested": "core.ResourceStatus:congested",
+    "ResourceStatusDegraded": "core.ResourceStatus:degraded",
+    "ResourceStatusDisconnected": "core.ResourceStatus:disconnected",
+    "ResourceStatusHealthy": "core.ResourceStatus:healthy",
+    "ResourceStatusReadonly": "core.ResourceStatus:readonly",
+    "ResourceStatusRecovering": "core.ResourceStatus:recovering",
+    "ResourceStatusUnknown": "core.ResourceStatus:unknown",
+    "StreamDeliveryAtLeastOnce": "core.StreamDeliverySemantics:at_least_once",
+    "StreamDeliveryBestEffort": "core.StreamDeliverySemantics:best_effort",
+    "WarmupPolicyAlwaysOn": "core.WarmupPolicy:always_on",
+    "WarmupPolicyLazy": "core.WarmupPolicy:lazy",
+    "WarmupPolicyPreload": "core.WarmupPolicy:preload"
+  },
+  "wire": {
+    "protocol_version": 1,
+    "magic_cookie_key": "PUNK_PLUGIN_MAGIC",
+    "magic_cookie_value": "punk-rule-engine",
+    "dispense_keys": [
+      "connector",
+      "plugin"
+    ],
+    "rpc_methods": [
+      "Engine.AckRPC",
+      "Engine.ConnectorAckStreamRPC",
+      "Engine.ConnectorCloseStreamRPC",
+      "Engine.ConnectorExecuteRPC",
+      "Engine.ConnectorGrantCreditsRPC",
+      "Engine.ConnectorNackStreamRPC",
+      "Engine.ConnectorOpenStreamRPC",
+      "Engine.ConnectorReceiveStreamRPC",
+      "Engine.CurrentResourceStatusRPC",
+      "Engine.DeleteStateRPC",
+      "Engine.EmitBatchRPC",
+      "Engine.EmitRPC",
+      "Engine.GetStateRPC",
+      "Engine.IncCounterRPC",
+      "Engine.LogBatchRPC",
+      "Engine.LogRPC",
+      "Engine.NextResourceEventRPC",
+      "Engine.ObserveRPC",
+      "Engine.PublishAckRPC",
+      "Engine.ReportHealthRPC",
+      "Engine.SetStateRPC",
+      "Engine.SetStateWithTTLRPC",
+      "Plugin.AckStream",
+      "Plugin.CloseStream",
+      "Plugin.CreateResource",
+      "Plugin.DestroyResource",
+      "Plugin.Execute",
+      "Plugin.GrantCredits",
+      "Plugin.Info",
+      "Plugin.Init",
+      "Plugin.NackStream",
+      "Plugin.OpenStream",
+      "Plugin.Probe",
+      "Plugin.ReceiveEvent",
+      "Plugin.ReceiveEvents",
+      "Plugin.ReceiveStream",
+      "Plugin.Start",
+      "Plugin.Stop"
+    ],
+    "error_fixtures": [
+      "PUNK_PLUGIN_ERROR:{\"kind\":\"retryable\",\"message\":\"fixture\"}",
+      "PUNK_PLUGIN_ERROR:{\"kind\":\"not_implemented\",\"message\":\"method not implemented\"}",
+      "PUNK_PLUGIN_ERROR:{\"kind\":\"batch_unsupported\",\"message\":\"batch processing not supported\"}"
+    ]
+  }
+}

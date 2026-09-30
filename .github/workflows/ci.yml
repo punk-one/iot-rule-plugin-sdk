@@ -1,0 +1,35 @@
+name: SDK CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - name: Unit and contract tests
+        run: go test ./...
+      - name: Race tests
+        run: go test -race ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Build examples
+        run: go build ./examples/...
+      - name: Verify generated API documents
+        run: go run ./internal/tools/public_api_export.go
+      - name: Verify generated v1 contract
+        run: go run ./internal/tools/contract_snapshot
+      - name: Reject unreviewed generated changes
+        run: git diff --exit-code -- PUBLIC_API.md contract_v1.json
